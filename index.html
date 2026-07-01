@@ -264,6 +264,10 @@
     margin-top:10px;text-align:right;font-size:14px;font-weight:800;
   }
   .doc-mic{ margin-top:18px; text-align:center; }
+  .doc-mic-label{
+    font-size:11px;font-weight:800;color:#4a2233;letter-spacing:.08em;
+    margin-bottom:4px;text-align:left;
+  }
   .doc-mic img{ width:100%; max-width:100%; border-radius:6px; }
   .doc-footer{
     margin-top:14px; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px;
@@ -366,10 +370,14 @@
         <input type="text" id="micCount" value="3本" style="width:80px;">
       </label>
       <label>音出し
-        <input type="text" id="onkyoMethod" value="PC" style="width:80px;">
+        <select id="onkyoMethod" style="background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:7px 9px;font-size:13px;width:80px;">
+          <option value="PC" selected>PC</option>
+          <option value="CD">CD</option>
+        </select>
       </label>
       <label>出力端子
         <select id="outputJack" style="background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:7px 9px;font-size:13px;width:100px;">
+          <option value=""></option>
           <option value="ミニステ" selected>ミニステ</option>
           <option value="キャノン">キャノン</option>
         </select>
@@ -1151,6 +1159,7 @@ document.getElementById('genBtn').addEventListener('click', ()=>{
     </table>
     <div class="doc-total">合計時間　${toMMSS(total)}</div>
     <div class="doc-mic">
+      <div class="doc-mic-label">マイク番号</div>
       <img src="${MIC_IMG}" alt="マイク番号">
     </div>
     <div class="doc-footer">
