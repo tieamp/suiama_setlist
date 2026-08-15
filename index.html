@@ -528,6 +528,12 @@ function usedBaseTitles(){
   return new Set(setlist.filter(x=>x.type==='song').map(x=>baseTitle(x.t)));
 }
 
+// 現在のセトリの末尾がMCかどうかを見て、新しく追加する曲のデフォルトきっかけを決める
+function defaultKikkakeForAppend(){
+  const last = setlist[setlist.length - 1];
+  return (last && last.type === 'mc') ? '曲振り' : '音先';
+}
+
 function renderSongList(){
   const list = document.getElementById('songList');
   list.innerHTML = '';
@@ -578,7 +584,7 @@ function renderSongList(){
         `;
         row.addEventListener('click', ()=>{
           if(isUsed) return;
-          setlist.push({type:'song', t:song.t, time:toSec(song.time), light:song.light||'', onkyo:song.onkyo||'', kikkake:'音先', remark:'', id:Date.now()+Math.random()});
+          setlist.push({type:'song', t:song.t, time:toSec(song.time), light:song.light||'', onkyo:song.onkyo||'', kikkake:defaultKikkakeForAppend(), remark:'', id:Date.now()+Math.random()});
           renderAll();
         });
         rows.appendChild(row);
@@ -955,7 +961,9 @@ function autoGenerate(){
     for(let seg=0; seg<segments; seg++){
       let count = base2 + (seg < extra ? 1 : 0);
       for(let k=0;k<count;k++){
-        setlist.push(selected[songIdx++]);
+        const song = selected[songIdx++];
+        if(seg > 0 && k === 0) song.kikkake = '曲振り'; // MC直後の曲はデフォルトで「曲振り」
+        setlist.push(song);
       }
       if(seg < mcCount){
         setlist.push({type:'mc', t:'MC', time:mcTimes[seg], id:Date.now()+Math.random()});
@@ -1044,31 +1052,45 @@ function extractTitleKikkakeTime(line){
   return { title, kikkake, time };
 }
 
+// 行が「登場SE」を指しているかどうかを判定（デフォルトで固定表示されるため、テキストに含まれていても無視する）
+function isSELine(line){
+  const stripped = line.replace(/[\s　]/g, '').replace(/^[【\[]|[】\]]$/g, '');
+  return /^(登場)?(通常)?(ショート)?SE$/i.test(stripped) || /^(登場)?SE[（(].*[)）]$/i.test(stripped);
+}
+
 document.getElementById('buildFromTextBtn').addEventListener('click', ()=>{
   const raw = document.getElementById('textInput').value;
   const lines = raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
   const newSetlist = [];
   const noTimeCovers = [];
   const usedBase = new Set();
+  let prevWasMC = false;
 
   lines.forEach(line=>{
+    if(isSELine(line)){
+      // 登場SEは固定枠で自動的に表示されるため、テキストに含まれていてもスキップする
+      return;
+    }
     if(/^MC\b/i.test(line)){
       // 「MC」や「MC 2:00」のような行に対応
       const m = line.match(/(\d+):(\d{2})/);
       const time = m ? (+m[1]*60 + +m[2]) : 120;
       newSetlist.push({type:'mc', t:'MC', time, id:Date.now()+Math.random()});
+      prevWasMC = true;
       return;
     }
     const { title, kikkake, time } = extractTitleKikkakeTime(line);
+    const defaultKikkake = prevWasMC ? '曲振り' : '音先';
     const song = findSongByText(title);
     if(!song){
       // 楽曲DBに無い曲＝カバー曲/イレギュラー曲として、曲名・きっかけ・タイム（あれば）を反映して追加
       newSetlist.push({
         type:'song', t:title, time: time!=null ? time : 180,
-        light:'', onkyo:'', kikkake: kikkake || '音先', remark:'',
+        light:'', onkyo:'', kikkake: kikkake || defaultKikkake, remark:'',
         custom:true, id:Date.now()+Math.random()
       });
       if(time==null) noTimeCovers.push(title);
+      prevWasMC = false;
       return;
     }
     const base = baseTitle(song.t);
@@ -1078,9 +1100,10 @@ document.getElementById('buildFromTextBtn').addEventListener('click', ()=>{
     usedBase.add(base);
     newSetlist.push({
       type:'song', t:song.t, time:toSec(song.time),
-      light:song.light||'', onkyo:song.onkyo||'', kikkake: kikkake || '音先', remark:'',
+      light:song.light||'', onkyo:song.onkyo||'', kikkake: kikkake || defaultKikkake, remark:'',
       id:Date.now()+Math.random()
     });
+    prevWasMC = false;
   });
 
   setlist = newSetlist;
@@ -1099,7 +1122,7 @@ document.getElementById('addMcBtn').addEventListener('click', ()=>{
 document.getElementById('addCustomSongBtn').addEventListener('click', ()=>{
   setlist.push({
     type:'song', t:'', time:180, light:'', onkyo:'',
-    kikkake:'音先', remark:'', custom:true, id:Date.now()+Math.random()
+    kikkake:defaultKikkakeForAppend(), remark:'', custom:true, id:Date.now()+Math.random()
   });
   renderAll();
 });
