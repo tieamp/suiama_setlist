@@ -1053,9 +1053,26 @@ function extractTitleKikkakeTime(line){
 }
 
 // 行が「登場SE」を指しているかどうかを判定（デフォルトで固定表示されるため、テキストに含まれていても無視する）
+// 「SE　1:28」「SE　通常SE　1:28」（本ツールのテキスト出力の書式）のようにタイムや種別が付いていても判定できるようにする
 function isSELine(line){
-  const stripped = line.replace(/[\s　]/g, '').replace(/^[【\[]|[】\]]$/g, '');
-  return /^(登場)?(通常)?(ショート)?SE$/i.test(stripped) || /^(登場)?SE[（(].*[)）]$/i.test(stripped);
+  const parts = line.split(/[\t　]+|\s{2,}/).map(p=>p.trim()).filter(p=>p.length>0);
+  const remain = parts.filter(p => !/^\d{1,3}:\d{2}$/.test(p)); // タイムのトークンは除外
+  if(remain.length === 0) return false;
+  return remain.every(p=>{
+    const s = p.replace(/^[【\[]|[】\]]$/g, '');
+    return /^(登場)?(通常)?(ショート)?SE$/i.test(s);
+  });
+}
+
+// 行が「退場MC」を指しているかどうかを判定（登場SEと同様、固定枠で自動表示されるためテキストに含まれていても無視する）
+function isExitMCLine(line){
+  const parts = line.split(/[\t　]+|\s{2,}/).map(p=>p.trim()).filter(p=>p.length>0);
+  const remain = parts.filter(p => !/^\d{1,3}:\d{2}$/.test(p));
+  if(remain.length === 0) return false;
+  return remain.every(p=>{
+    const s = p.replace(/^[【\[]|[】\]]$/g, '');
+    return /^退場MC$/i.test(s);
+  });
 }
 
 document.getElementById('buildFromTextBtn').addEventListener('click', ()=>{
@@ -1069,6 +1086,10 @@ document.getElementById('buildFromTextBtn').addEventListener('click', ()=>{
   lines.forEach(line=>{
     if(isSELine(line)){
       // 登場SEは固定枠で自動的に表示されるため、テキストに含まれていてもスキップする
+      return;
+    }
+    if(isExitMCLine(line)){
+      // 退場MCも固定枠で自動的に表示されるため、テキストに含まれていてもスキップする
       return;
     }
     if(/^MC\b/i.test(line)){
