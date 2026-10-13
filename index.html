@@ -341,6 +341,11 @@
       break-inside:avoid;
     }
   }
+  .db-input{background:var(--panel2);border:1px solid var(--line);border-radius:5px;color:var(--text);padding:4px 6px;font-size:12px;font-family:inherit;width:100%;box-sizing:border-box;}
+  .db-freq{width:50px;}
+  .db-time{width:70px;}
+  .db-del{background:none;border:none;color:#e2004f;font-size:16px;cursor:pointer;padding:2px 6px;}
+  .db-check{width:18px;height:18px;accent-color:var(--accent);}
 </style>
 </head>
 <body>
@@ -434,6 +439,7 @@
       <button class="btn secondary" id="saveDraftBtn">💾 一時保存</button>
       <button class="btn secondary" id="loadDraftBtn">📂 読み込み</button>
       <span id="draftStatus" style="font-size:11px;color:var(--text-dim);align-self:center;"></span>
+      <button class="btn secondary" id="dbEditorBtn" style="margin-left:auto;">⚙ 楽曲・設定を編集</button>
     </div>
     <div id="loadConfirmBox" style="display:none;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;padding:10px 12px;background:#ffeaf3;border:1px solid var(--accent);border-radius:8px;font-size:12px;">
       <span id="loadConfirmText"></span>
@@ -448,6 +454,41 @@
       <div class="actions" style="margin-top:8px;">
         <button class="btn secondary" id="copyTextBtn">📋 全選択してコピー</button>
       </div>
+    </div>
+  </div>
+
+  <!-- エディターパネル -->
+  <div class="panel" id="dbEditorPanel" style="display:none;">
+    <h2 style="margin-top:0;">⚙ 楽曲・設定エディター</h2>
+    <p style="color:var(--text-dim);font-size:12px;margin-bottom:12px;">変更はこのブラウザに保存されます。全員に反映するには「HTMLをエクスポート」してClaudeに送ってください。</p>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:4px;">📢 音響・照明への要望（デフォルト）</label>
+      <textarea id="dbDefaultRequest" style="width:100%;min-height:48px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:7px 9px;font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+    </div>
+    <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn" id="dbAddSongBtn">＋ 曲を追加</button>
+      <button class="btn secondary" id="dbSaveBtn">💾 保存</button>
+      <button class="btn secondary" id="dbResetBtn">↩ リセット（初期データに戻す）</button>
+      <button class="btn" id="dbExportBtn" style="background:var(--green);color:#000;">⬇ HTMLをエクスポート</button>
+    </div>
+    <div id="dbSaveMsg" style="display:none;padding:8px 12px;border-radius:8px;font-size:13px;margin-bottom:8px;"></div>
+    <div style="overflow-x:auto;">
+      <table id="dbTable" style="width:100%;border-collapse:collapse;font-size:12px;min-width:700px;">
+        <thead>
+          <tr style="background:var(--panel2);">
+            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--line);">曲名</th>
+            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--line);">尺</th>
+            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--line);">頻度 1〜5</th>
+            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--line);">照明要望</th>
+            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--line);">音響要望</th>
+            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--line);">ベース曲 バリエーション元</th>
+            <th style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--line);">変化球</th>
+            <th style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--line);">手動のみ</th>
+            <th style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--line);">削除</th>
+          </tr>
+        </thead>
+        <tbody id="dbTableBody"></tbody>
+      </table>
     </div>
   </div>
 
@@ -511,7 +552,9 @@ function toMMSS(sec){
 }
 // バリエーション同一曲判定用：タイトルから【ショート】や ドラムループ/ イントロ/ などを除いた基底名
 function baseTitle(t){
-  return t.replace(/ドラムループ\//,"").replace(/イントロ\//,"").replace(/【ショート】/,"").replace(/!+$/,"").trim();
+  const song = DB.find(s => s.t === t);
+  if(song && song.base) return song.base;
+  return t.replace(/ドラムループ\//,"").replace(/イントロ\//,"").replace(/【ショート】/,"").replace(/【ショート＆ループ】/,"").replace(/!+$/,"").trim();
 }
 
 let setlist = []; // {type:'song'|'mc', t, time(sec), id}
@@ -1622,6 +1665,161 @@ document.addEventListener('change', scheduleAutoSave);
 })();
 
 renderAll();
+
+// ===== DB エディター =====
+const DB_STORAGE_KEY = 'suiama_db_custom';
+const DB_INITIAL = DB.map(s=>({...s}));
+
+(function applyCustomDB(){
+  try{
+    const saved = localStorage.getItem(DB_STORAGE_KEY);
+    if(!saved) return;
+    const parsed = JSON.parse(saved);
+    if(!parsed || !parsed.songs) return;
+    DB.splice(0, DB.length, ...parsed.songs);
+    if(parsed.henkyoku){ HENKYOKU_BASE.clear(); parsed.henkyoku.forEach(b=> HENKYOKU_BASE.add(b)); }
+    if(parsed.zeroProb){ ZERO_PROB_BASE.clear(); parsed.zeroProb.forEach(b=> ZERO_PROB_BASE.add(b)); }
+    if(parsed.defaultRequest != null){ const el = document.getElementById('generalRequest'); if(el) el.value = parsed.defaultRequest; }
+    renderAll();
+  }catch(e){}
+})();
+
+function renderDbEditor(){
+  const reqEl = document.getElementById('dbDefaultRequest');
+  if(reqEl) reqEl.value = document.getElementById('generalRequest').value;
+  const tbody = document.getElementById('dbTableBody');
+  if(!tbody) return;
+  const baseCandidates = [...new Set(DB.map(s=>{
+    return s.t.replace(/ドラムループ\//,"").replace(/イントロ\//,"")
+      .replace(/【ショート】/,"").replace(/【ショート＆ループ】/,"").replace(/!+$/,"").trim();
+  }))].sort();
+  tbody.innerHTML = '';
+  DB.forEach((song, i)=>{
+    const baseOptions = baseCandidates.map(b=>
+      `<option value="${b.replace(/"/g,'&quot;')}" ${(song.base||'')=== b?'selected':''}>${b}</option>`
+    ).join('');
+    const tr = document.createElement('tr');
+    tr.style.borderBottom = '1px solid var(--line)';
+    tr.innerHTML = `
+      <td style="padding:4px 6px;"><input class="db-input" data-i="${i}" data-f="t" value="${(song.t||'').replace(/"/g,'&quot;')}"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-time" type="text" data-i="${i}" data-f="time" value="${song.time||''}"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-freq" type="number" min="1" max="5" data-i="${i}" data-f="freq" value="${song.freq||3}"></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="${i}" data-f="lightReq" value="${(song.lightReq||'').replace(/"/g,'&quot;')}"></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="${i}" data-f="soundReq" value="${(song.soundReq||'').replace(/"/g,'&quot;')}"></td>
+      <td style="padding:4px 6px;">
+        <select class="db-input db-base-sel" data-i="${i}" style="min-width:130px;">
+          <option value="">（自動判定）</option>
+          ${baseOptions}
+        </select>
+      </td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-henkyoku" data-i="${i}" ${HENKYOKU_BASE.has(baseTitle(song.t))?'checked':''}></td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-zeroprob" data-i="${i}" ${ZERO_PROB_BASE.has(baseTitle(song.t))?'checked':''}></td>
+      <td style="padding:4px 6px;text-align:center;"><button class="db-del" data-i="${i}">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('.db-input[data-f]').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const idx = +e.target.dataset.i;
+      const field = e.target.dataset.f;
+      if(field === 'freq') DB[idx][field] = +e.target.value || 3;
+      else DB[idx][field] = e.target.value;
+    });
+    inp.addEventListener('click', e=> e.stopPropagation());
+  });
+  tbody.querySelectorAll('.db-base-sel').forEach(sel=>{
+    sel.addEventListener('change', e=>{
+      const idx = +e.target.dataset.i;
+      DB[idx].base = e.target.value || undefined;
+    });
+    sel.addEventListener('click', e=> e.stopPropagation());
+  });
+  tbody.querySelectorAll('.db-henkyoku').forEach(chk=>{
+    chk.addEventListener('change', e=>{
+      const idx = +e.target.dataset.i;
+      const base = baseTitle(DB[idx].t);
+      if(e.target.checked) HENKYOKU_BASE.add(base); else HENKYOKU_BASE.delete(base);
+    });
+  });
+  tbody.querySelectorAll('.db-zeroprob').forEach(chk=>{
+    chk.addEventListener('change', e=>{
+      const idx = +e.target.dataset.i;
+      const base = baseTitle(DB[idx].t);
+      if(e.target.checked) ZERO_PROB_BASE.add(base); else ZERO_PROB_BASE.delete(base);
+    });
+  });
+  tbody.querySelectorAll('.db-del').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      const idx = +e.target.dataset.i;
+      DB.splice(idx, 1);
+      renderDbEditor();
+      renderAll();
+    });
+  });
+}
+
+document.getElementById('dbEditorBtn').addEventListener('click', ()=>{
+  const panel = document.getElementById('dbEditorPanel');
+  const isHidden = panel.style.display === 'none';
+  panel.style.display = isHidden ? 'block' : 'none';
+  if(isHidden) renderDbEditor();
+});
+
+document.getElementById('dbAddSongBtn').addEventListener('click', ()=>{
+  DB.push({t:'新しい曲', time:'3:30', freq:3, lightReq:'', soundReq:''});
+  renderDbEditor();
+  renderAll();
+});
+
+document.getElementById('dbSaveBtn').addEventListener('click', ()=>{
+  const reqVal = document.getElementById('dbDefaultRequest').value;
+  document.getElementById('generalRequest').value = reqVal;
+  const data = {
+    songs: DB.map(s=>({...s})),
+    henkyoku: [...HENKYOKU_BASE],
+    zeroProb: [...ZERO_PROB_BASE],
+    defaultRequest: reqVal
+  };
+  localStorage.setItem(DB_STORAGE_KEY, JSON.stringify(data));
+  renderAll();
+  const msg = document.getElementById('dbSaveMsg');
+  msg.textContent = '✅ 保存しました（このブラウザに保存済み）';
+  msg.style.display = 'block';
+  msg.style.background = 'var(--green)';
+  msg.style.color = '#000';
+  setTimeout(()=>{ msg.style.display='none'; }, 3000);
+});
+
+document.getElementById('dbResetBtn').addEventListener('click', ()=>{
+  if(!confirm('初期データに戻しますか？ローカルの変更はすべて失われます。')) return;
+  localStorage.removeItem(DB_STORAGE_KEY);
+  DB.splice(0, DB.length, ...DB_INITIAL.map(s=>({...s})));
+  HENKYOKU_BASE.clear();
+  ZERO_PROB_BASE.clear();
+  renderDbEditor();
+  renderAll();
+});
+
+document.getElementById('dbExportBtn').addEventListener('click', ()=>{
+  const html = document.documentElement.outerHTML;
+  const dbJson = JSON.stringify(DB.map(s=>({...s})), null, 2);
+  const henkyokuJson = JSON.stringify([...HENKYOKU_BASE]);
+  const zeroProbJson = JSON.stringify([...ZERO_PROB_BASE]);
+  let newHtml = html;
+  newHtml = newHtml.replace(/const DB = \[[\s\S]*?\];(\s*const PRIORITY_BASE)/, `const DB = ${dbJson};\n$1`);
+  newHtml = newHtml.replace(/const HENKYOKU_BASE = new Set\(\[[\s\S]*?\]\);/, `const HENKYOKU_BASE = new Set(${henkyokuJson});`);
+  newHtml = newHtml.replace(/const ZERO_PROB_BASE = new Set\(\[[\s\S]*?\]\);/, `const ZERO_PROB_BASE = new Set(${zeroProbJson});`);
+  const reqVal2 = document.getElementById('dbDefaultRequest').value;
+  newHtml = newHtml.replace(
+    /(<textarea id="generalRequest"[^>]*>)([\s\S]*?)(<\/textarea>)/,
+    `$1${reqVal2.replace(/</g,'&lt;').replace(/>/g,'&gt;')}$3`
+  );
+  const blob = new Blob([newHtml], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'index.html'; a.click();
+  setTimeout(()=> URL.revokeObjectURL(url), 1000);
+});
 </script>
 
 </body>
