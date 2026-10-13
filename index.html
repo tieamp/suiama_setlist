@@ -444,6 +444,7 @@
       <button class="btn secondary" id="printBtn" style="display:none;">🖨 印刷／PDF保存</button>
       <button class="btn secondary" id="downloadPrintBtn" style="display:none;">⬇ 印刷用HTMLを保存</button>
       <button class="btn" id="textGenBtn">テキスト出力</button>
+      <button class="btn secondary" id="kanpeBtn">📋 カンペ出力</button>
     </div>
     <div class="actions" style="margin-top:6px;">
       <button class="btn secondary" id="saveDraftBtn">💾 一時保存</button>
@@ -1829,6 +1830,88 @@ document.getElementById('dbExportBtn').addEventListener('click', ()=>{
   const a = document.createElement('a');
   a.href = url; a.download = 'index.html'; a.click();
   setTimeout(()=> URL.revokeObjectURL(url), 1000);
+});
+
+// ===== カンペ出力 =====
+document.getElementById('kanpeBtn').addEventListener('click', ()=>{
+  const win = window.open('', '_blank');
+  if(!win){ alert('ポップアップがブロックされています。許可してから再度お試しください。'); return; }
+  win.document.open();
+
+  let rows = '';
+  setlist.forEach(item=>{
+    if(item.type==='song' || item.type==='custom'){
+      let base = item.t;
+      let ver = '';
+      if(base.startsWith('ドラムループ/')){ ver='ドラムループ'; base=base.slice('ドラムループ/'.length); }
+      else if(base.startsWith('イントロ/')){ ver='イントロ'; base=base.slice('イントロ/'.length); }
+      if(base.endsWith('【ショート】')){ ver=(ver?ver+' / ':'')+'ショート'; base=base.slice(0,-6); }
+      if(base.endsWith('【ショート＆ループ】')){ ver=(ver?ver+' / ':'')+'ショート＆ループ'; base=base.slice(0,-9); }
+      const verHtml = ver ? `<span class="kanpe-ver">[${ver}]</span> ` : '';
+      const kik = item.kikkake ? `（${item.kikkake}）` : '';
+      const note = item.remark ? `<span class="kanpe-note">　${escapeHtml(item.remark)}</span>` : '';
+      rows += `<div class="kanpe-row kanpe-song">${verHtml}${escapeHtml(base)}${escapeHtml(kik)}${note}</div>`;
+    } else if(item.type==='mc'){
+      const memo = item.remark ? `（${item.remark}）` : '';
+      rows += `<div class="kanpe-row kanpe-mc">MC${escapeHtml(memo)}</div>`;
+    }
+  });
+  if(useExitMC) rows += `<div class="kanpe-row kanpe-mc">退場MC</div>`;
+
+  win.document.write(`<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>カンペ</title>
+<style>
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body{
+  background:#000;
+  color:#fff;
+  font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",sans-serif;
+  min-height:100%;
+}
+@page{ size:A4 portrait; margin:0; }
+body{ padding:10mm; background:#000; }
+.back-btn{
+  display:inline-block;
+  margin-bottom:12px;
+  padding:8px 18px;
+  background:#333;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+}
+@media print{ .back-btn{ display:none; } }
+.kanpe-list{ display:flex; flex-direction:column; gap:6px; }
+.kanpe-row{
+  font-size:28px;
+  font-weight:900;
+  padding:8px 14px;
+  border-radius:6px;
+  line-height:1.3;
+  letter-spacing:.03em;
+  word-break:break-all;
+}
+.kanpe-song{ color:#FFD700; }
+.kanpe-mc{ color:#FF4444; }
+.kanpe-note{ font-size:20px; font-weight:700; color:#aaa; margin-left:8px; }
+.kanpe-ver{ display:inline; font-size:16px; font-weight:700; color:#FFA500; margin-right:4px; }
+@media print{
+  html,body{ background:#000 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+}
+</style>
+</head>
+<body>
+<button class="back-btn" onclick="window.close()">← 戻る</button>
+<div class="kanpe-list">${rows}</div>
+</body>
+</html>`);
+  win.document.close();
+  setTimeout(()=>{ try{ win.focus(); win.print(); }catch(e){} }, 400);
 });
 </script>
 
