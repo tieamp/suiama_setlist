@@ -476,6 +476,18 @@
       <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:4px;">📢 音響・照明への要望（デフォルト）</label>
       <textarea id="dbDefaultRequest" style="width:100%;min-height:48px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:7px 9px;font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
     </div>
+    <div style="margin-bottom:12px;display:flex;gap:16px;flex-wrap:wrap;">
+      <div>
+        <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:4px;">🖼 グループロゴ画像</label>
+        <input type="file" id="dbLogoFile" accept="image/*" style="font-size:12px;">
+        <div id="dbLogoPreview" style="margin-top:6px;"></div>
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:4px;">🎤 マイク番号画像</label>
+        <input type="file" id="dbMicFile" accept="image/*" style="font-size:12px;">
+        <div id="dbMicPreview" style="margin-top:6px;"></div>
+      </div>
+    </div>
     <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
       <button class="btn" id="dbAddSongBtn">＋ 曲を追加</button>
       <button class="btn secondary" id="dbSaveBtn">💾 保存</button>
@@ -1825,12 +1837,43 @@ document.getElementById('dbExportBtn').addEventListener('click', ()=>{
     /(<textarea id="generalRequest"[^>]*>)([\s\S]*?)(<\/textarea>)/,
     `$1${reqVal2.replace(/</g,'&lt;').replace(/>/g,'&gt;')}$3`
   );
+  // 画像を置き換え
+  if(window._DB_LOGO_IMG){
+    newHtml = newHtml.replace(/const LOGO_IMG = "[^"]*"/, `const LOGO_IMG = "${window._DB_LOGO_IMG}"`);
+  }
+  if(window._DB_MIC_IMG){
+    newHtml = newHtml.replace(/const MIC_IMG = "[^"]*"/, `const MIC_IMG = "${window._DB_MIC_IMG}"`);
+  }
+
   const blob = new Blob([newHtml], {type:'text/html;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = 'index.html'; a.click();
   setTimeout(()=> URL.revokeObjectURL(url), 1000);
 });
+
+// 画像アップロード
+function setupImageUpload(inputId, previewId, globalKey, imgVarName){
+  const input = document.getElementById(inputId);
+  const preview = document.getElementById(previewId);
+  if(!input) return;
+  const cur = window[imgVarName];
+  if(cur) preview.innerHTML = `<img src="${cur}" style="max-height:48px;border-radius:4px;border:1px solid var(--line);">`;
+  input.addEventListener('change', e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      const dataUrl = ev.target.result;
+      window[globalKey] = dataUrl;
+      window[imgVarName] = dataUrl;
+      preview.innerHTML = `<img src="${dataUrl}" style="max-height:48px;border-radius:4px;border:1px solid var(--line);">`;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+setupImageUpload('dbLogoFile','dbLogoPreview','_DB_LOGO_IMG','LOGO_IMG');
+setupImageUpload('dbMicFile','dbMicPreview','_DB_MIC_IMG','MIC_IMG');
 
 // ===== カンペ出力 =====
 document.getElementById('kanpeBtn').addEventListener('click', ()=>{
