@@ -29,6 +29,15 @@
     padding:28px 24px 18px;
     border-bottom:1px solid var(--line);
     background:radial-gradient(ellipse at top left, rgba(226,0,79,.10), transparent 60%);
+    position:relative;
+  }
+  .ver-badge{
+    position:absolute;top:14px;right:16px;
+    font-size:11px;color:var(--text-dim);
+    background:rgba(255,255,255,.07);
+    border:1px solid var(--line);
+    border-radius:20px;padding:2px 8px;
+    letter-spacing:.04em;
   }
   header h1{
     margin:0 0 4px;
@@ -351,6 +360,7 @@
 <body>
 
 <header>
+  <span class="ver-badge">v1.0</span>
   <h1><span>スイモアマイモン！</span> セトリビルダー</h1>
   <p>採用済み楽曲はグレーアウト表示。出演枠タイムに合わせてセトリを組み立てます。</p>
 </header>
