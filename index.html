@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
+<html lang="ja"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>スイモアマイモン！ セトリビルダー</title>
@@ -365,8 +363,8 @@
   <p>採用済み楽曲はグレーアウト表示。出演枠タイムに合わせてセトリを組み立てます。</p>
 </header>
 
-<div id="draftBanner" style="display:none;max-width:1100px;margin:12px auto 0;padding:10px 16px;background:#ffeaf3;border:1.5px solid var(--accent);border-radius:10px;font-size:13px;align-items:center;gap:12px;flex-wrap:wrap;">
-  <span id="draftBannerText">保存されていた下書きがあります。</span>
+<div id="draftBanner" style="display: none; max-width: 1100px; margin: 12px auto 0px; padding: 10px 16px; background: rgb(255, 234, 243); border: 1.5px solid var(--accent); border-radius: 10px; font-size: 13px; align-items: center; gap: 12px; flex-wrap: wrap;">
+  <span id="draftBannerText">保存されていた下書きがあります（10/19 18:54時点）</span>
   <button class="btn" id="draftRestoreBtn" style="padding:6px 14px;font-size:12px;">復元する</button>
   <button class="btn secondary" id="draftDismissBtn" style="padding:6px 14px;font-size:12px;">新規で始める</button>
 </div>
@@ -396,14 +394,14 @@
       </label>
       <label>音出し
         <select id="onkyoMethod" style="background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:7px 9px;font-size:13px;width:80px;">
-          <option value="PC" selected>PC</option>
+          <option value="PC" selected="">PC</option>
           <option value="CD">CD</option>
         </select>
       </label>
       <label>出力端子
         <select id="outputJack" style="background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:7px 9px;font-size:13px;width:100px;">
           <option value=""></option>
-          <option value="ミニステ" selected>ミニステ</option>
+          <option value="ミニステ" selected="">ミニステ</option>
           <option value="キャノン">キャノン</option>
         </select>
       </label>
@@ -411,8 +409,8 @@
     <div class="controls">
       <label style="flex:1;">音響・照明への要望（任意）
         <textarea id="generalRequest" style="width:100%;min-height:50px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:7px 9px;font-size:13px;font-family:inherit;resize:vertical;">・ボーカルは全体的に中音、外音ともに大きめでお願いしたいですが、立ち過ぎないようにお願いいたします。
-・3番マイクを大きめ、2番マイクのハイを少し削ってください。
-・照明は全体的に「かわいくポップ」なイメージでお願いいたします</textarea>
+・3番マイクを大きめにしてください。
+・照明は全体的に「かわいくポップ」に「明るめ」でお願いいたします。</textarea>
       </label>
     </div>
     <div class="actions" style="margin-top:0;">
@@ -420,8 +418,14 @@
       <button class="btn secondary" id="textInputToggleBtn">📝 テキスト入力</button>
     </div>
 
-    <div id="textInputWrap" style="margin-top:10px;display:none;">
-      <textarea id="textInput" placeholder="曲名を1行に1曲ずつ入力してください（MCを入れたい場所には「MC」または「MC 1:30」のように書いてください）&#10;楽曲一覧に無いカバー曲/イレギュラー曲は「曲名　きっかけ　タイム」の形式で書くと自動で反映されます&#10;例）&#10;START!&#10;MC 1:30&#10;トロピカーナ　音先&#10;カバー曲タイトル　曲振り　3:15" style="min-height:140px;"></textarea>
+    <div id="textInputWrap" style="margin-top: 10px; display: block;">
+      <textarea id="textInput" placeholder="曲名を1行に1曲ずつ入力してください（MCを入れたい場所には「MC」または「MC 1:30」のように書いてください）
+楽曲一覧に無いカバー曲/イレギュラー曲は「曲名　きっかけ　タイム」の形式で書くと自動で反映されます
+例）
+START!
+MC 1:30
+トロピカーナ　音先
+カバー曲タイトル　曲振り　3:15" style="min-height:140px;"></textarea>
       <div class="actions" style="margin-top:8px;">
         <button class="btn" id="buildFromTextBtn">このリストでセトリを作成</button>
       </div>
@@ -429,11 +433,117 @@
     </div>
 
     <h2 style="margin-top:18px;">セットリスト</h2>
-    <div class="setlist" id="setlist"></div>
+    <div class="setlist" id="setlist"><div class="slot fixed">
+    <div class="idx">SE</div>
+    <div class="title" style="">登場SE</div>
+    <select id="seTypeSelect" class="kikkake-select" style="flex:0 0 auto;">
+      <option value="normal" selected="">通常SE</option>
+      <option value="short">ショートSE</option>
+    </select>
+    <input type="text" class="mc-time-input" id="seTimeInput" value="1:28" title="時間を手入力(例:1:00)">
+    <button class="toggle-fixed-btn active" id="toggleSEBtn">使用中</button>
+  </div><div class="slot" draggable="true" data-i="0">
+        <span class="drag-handle" title="長押しして並び替え">⠿</span>
+        <div class="idx">1</div>
+        <div class="title">Sweet♡Secret</div>
+        
+        <select class="kikkake-select" data-i="0">
+          <option value="音先" selected="">音先</option>
+          <option value="曲振り">曲振り</option>
+          <option value="板付">板付</option>
+          <option value="">―</option>
+        </select>
+        
+        <input type="text" class="remark-input" data-i="0" placeholder="備考" value="">
+        
+        
+        
+        <div class="time">3:27</div>
+        <button data-i="0" title="削除">×</button>
+      </div><div class="slot" draggable="true" data-i="1">
+        <span class="drag-handle" title="長押しして並び替え">⠿</span>
+        <div class="idx">2</div>
+        
+        <input type="text" class="custom-title-input" data-i="1" value="2 PaPiPuPePONG" placeholder="曲名を入力">
+        
+        <select class="kikkake-select" data-i="1">
+          <option value="音先" selected="">音先</option>
+          <option value="曲振り">曲振り</option>
+          <option value="板付">板付</option>
+          <option value="">―</option>
+        </select>
+        
+        <input type="text" class="remark-input" data-i="1" placeholder="備考" value="">
+        
+        
+        <input type="text" class="mc-time-input" data-i="1" value="3:28" title="時間を手入力(例:3:00)">
+        
+        <div class="time"></div>
+        <button data-i="1" title="削除">×</button>
+      </div><div class="slot" draggable="true" data-i="2">
+        <span class="drag-handle" title="長押しして並び替え">⠿</span>
+        <div class="idx">3</div>
+        <div class="title">Sister</div>
+        
+        <select class="kikkake-select" data-i="2">
+          <option value="音先" selected="">音先</option>
+          <option value="曲振り">曲振り</option>
+          <option value="板付">板付</option>
+          <option value="">―</option>
+        </select>
+        
+        <input type="text" class="remark-input" data-i="2" placeholder="備考" value="">
+        
+        
+        
+        <div class="time">3:42</div>
+        <button data-i="2" title="削除">×</button>
+      </div><div class="slot" draggable="true" data-i="3">
+        <span class="drag-handle" title="長押しして並び替え">⠿</span>
+        <div class="idx">4</div>
+        <div class="title">YUMEMITYAINA</div>
+        
+        <select class="kikkake-select" data-i="3">
+          <option value="音先" selected="">音先</option>
+          <option value="曲振り">曲振り</option>
+          <option value="板付">板付</option>
+          <option value="">―</option>
+        </select>
+        
+        <input type="text" class="remark-input" data-i="3" placeholder="備考" value="">
+        
+        
+        
+        <div class="time">3:32</div>
+        <button data-i="3" title="削除">×</button>
+      </div><div class="slot" draggable="true" data-i="4">
+        <span class="drag-handle" title="長押しして並び替え">⠿</span>
+        <div class="idx">5</div>
+        <div class="title">放課後シャングリラ</div>
+        
+        <select class="kikkake-select" data-i="4">
+          <option value="音先" selected="">音先</option>
+          <option value="曲振り">曲振り</option>
+          <option value="板付">板付</option>
+          <option value="">―</option>
+        </select>
+        
+        <input type="text" class="remark-input" data-i="4" placeholder="備考" value="">
+        
+        
+        
+        <div class="time">3:23</div>
+        <button data-i="4" title="削除">×</button>
+      </div><div class="slot fixed">
+    <div class="idx">MC</div>
+    <div class="title" style="">退場MC</div>
+    <input type="text" class="mc-time-input" id="exitTimeInput" value="0:30" title="時間を手入力(例:0:30)">
+    <button class="toggle-fixed-btn active" id="toggleExitBtn">使用中</button>
+  </div></div>
 
     <div class="summary">
-      <div>目標 <b id="targetDisp">25:00</b> ／ 残り <span id="remain">25:00</span></div>
-      <div class="total" id="totalTime">0:00</div>
+      <div>目標 <b id="targetDisp">25:00</b> ／ 残り <span id="remain" class="ng">5:30</span></div>
+      <div class="total" id="totalTime">19:30</div>
     </div>
 
     <div class="actions">
@@ -469,7 +579,7 @@
   </div>
 
   <!-- エディターパネル -->
-  <div class="panel" id="dbEditorPanel" style="display:none;">
+  <div class="panel" id="dbEditorPanel" style="display: block;">
     <h2 style="margin-top:0;">⚙ 楽曲・設定エディター</h2>
     <p style="color:var(--text-dim);font-size:12px;margin-bottom:12px;">変更はこのブラウザに保存されます。全員に反映するには「HTMLをエクスポート」してClaudeに送ってください。</p>
     <div style="margin-bottom:12px;">
@@ -510,19 +620,265 @@
             <th style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--line);">削除</th>
           </tr>
         </thead>
-        <tbody id="dbTableBody"></tbody>
+        <tbody id="dbTableBody"><tr style="border-bottom: 1px solid var(--line);">
+      <td style="padding:4px 6px;"><input class="db-input" data-i="0" data-f="t" value="START!"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-time" type="text" data-i="0" data-f="time" value="3:49"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-freq" type="number" min="1" max="5" data-i="0" data-f="freq" value="5"></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="0" data-f="lightReq" value=""></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="0" data-f="soundReq" value=""></td>
+      <td style="padding:4px 6px;">
+        <select class="db-input db-base-sel" data-i="0" style="min-width:130px;">
+          <option value="">（自動判定）</option>
+          <option value="Habitable Zone">Habitable Zone</option><option value="PaPiPuPePONG">PaPiPuPePONG</option><option value="Question♡ワタシ検定">Question♡ワタシ検定</option><option value="START">START</option><option value="Sister">Sister</option><option value="Sweet♡Secret">Sweet♡Secret</option><option value="YUMEMITYAINA">YUMEMITYAINA</option><option value="トロピカーナ">トロピカーナ</option><option value="好きMORE!甘いMORE">好きMORE!甘いMORE</option><option value="放課後シャングリラ">放課後シャングリラ</option><option value="新しい曲">新しい曲</option>
+        </select>
+      </td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-henkyoku" data-i="0"></td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-zeroprob" data-i="0"></td>
+      <td style="padding:4px 6px;text-align:center;"><button class="db-del" data-i="0">✕</button></td>
+    </tr><tr style="border-bottom: 1px solid var(--line);">
+      <td style="padding:4px 6px;"><input class="db-input" data-i="1" data-f="t" value="好きMORE!甘いMORE!"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-time" type="text" data-i="1" data-f="time" value="3:05"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-freq" type="number" min="1" max="5" data-i="1" data-f="freq" value="5"></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="1" data-f="lightReq" value=""></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="1" data-f="soundReq" value=""></td>
+      <td style="padding:4px 6px;">
+        <select class="db-input db-base-sel" data-i="1" style="min-width:130px;">
+          <option value="">（自動判定）</option>
+          <option value="Habitable Zone">Habitable Zone</option><option value="PaPiPuPePONG">PaPiPuPePONG</option><option value="Question♡ワタシ検定">Question♡ワタシ検定</option><option value="START">START</option><option value="Sister">Sister</option><option value="Sweet♡Secret">Sweet♡Secret</option><option value="YUMEMITYAINA">YUMEMITYAINA</option><option value="トロピカーナ">トロピカーナ</option><option value="好きMORE!甘いMORE">好きMORE!甘いMORE</option><option value="放課後シャングリラ">放課後シャングリラ</option><option value="新しい曲">新しい曲</option>
+        </select>
+      </td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-henkyoku" data-i="1"></td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-zeroprob" data-i="1"></td>
+      <td style="padding:4px 6px;text-align:center;"><button class="db-del" data-i="1">✕</button></td>
+    </tr><tr style="border-bottom: 1px solid var(--line);">
+      <td style="padding:4px 6px;"><input class="db-input" data-i="2" data-f="t" value="Sweet♡Secret"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-time" type="text" data-i="2" data-f="time" value="3:27"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-freq" type="number" min="1" max="5" data-i="2" data-f="freq" value="5"></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="2" data-f="lightReq" value=""></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="2" data-f="soundReq" value=""></td>
+      <td style="padding:4px 6px;">
+        <select class="db-input db-base-sel" data-i="2" style="min-width:130px;">
+          <option value="">（自動判定）</option>
+          <option value="Habitable Zone">Habitable Zone</option><option value="PaPiPuPePONG">PaPiPuPePONG</option><option value="Question♡ワタシ検定">Question♡ワタシ検定</option><option value="START">START</option><option value="Sister">Sister</option><option value="Sweet♡Secret">Sweet♡Secret</option><option value="YUMEMITYAINA">YUMEMITYAINA</option><option value="トロピカーナ">トロピカーナ</option><option value="好きMORE!甘いMORE">好きMORE!甘いMORE</option><option value="放課後シャングリラ">放課後シャングリラ</option><option value="新しい曲">新しい曲</option>
+        </select>
+      </td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-henkyoku" data-i="2"></td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-zeroprob" data-i="2"></td>
+      <td style="padding:4px 6px;text-align:center;"><button class="db-del" data-i="2">✕</button></td>
+    </tr><tr style="border-bottom: 1px solid var(--line);">
+      <td style="padding:4px 6px;"><input class="db-input" data-i="3" data-f="t" value="放課後シャングリラ"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-time" type="text" data-i="3" data-f="time" value="3:23"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-freq" type="number" min="1" max="5" data-i="3" data-f="freq" value="5"></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="3" data-f="lightReq" value=""></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="3" data-f="soundReq" value=""></td>
+      <td style="padding:4px 6px;">
+        <select class="db-input db-base-sel" data-i="3" style="min-width:130px;">
+          <option value="">（自動判定）</option>
+          <option value="Habitable Zone">Habitable Zone</option><option value="PaPiPuPePONG">PaPiPuPePONG</option><option value="Question♡ワタシ検定">Question♡ワタシ検定</option><option value="START">START</option><option value="Sister">Sister</option><option value="Sweet♡Secret">Sweet♡Secret</option><option value="YUMEMITYAINA">YUMEMITYAINA</option><option value="トロピカーナ">トロピカーナ</option><option value="好きMORE!甘いMORE">好きMORE!甘いMORE</option><option value="放課後シャングリラ">放課後シャングリラ</option><option value="新しい曲">新しい曲</option>
+        </select>
+      </td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-henkyoku" data-i="3"></td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-zeroprob" data-i="3"></td>
+      <td style="padding:4px 6px;text-align:center;"><button class="db-del" data-i="3">✕</button></td>
+    </tr><tr style="border-bottom: 1px solid var(--line);">
+      <td style="padding:4px 6px;"><input class="db-input" data-i="4" data-f="t" value="YUMEMITYAINA"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-time" type="text" data-i="4" data-f="time" value="3:32"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-freq" type="number" min="1" max="5" data-i="4" data-f="freq" value="5"></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="4" data-f="lightReq" value=""></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="4" data-f="soundReq" value=""></td>
+      <td style="padding:4px 6px;">
+        <select class="db-input db-base-sel" data-i="4" style="min-width:130px;">
+          <option value="">（自動判定）</option>
+          <option value="Habitable Zone">Habitable Zone</option><option value="PaPiPuPePONG">PaPiPuPePONG</option><option value="Question♡ワタシ検定">Question♡ワタシ検定</option><option value="START">START</option><option value="Sister">Sister</option><option value="Sweet♡Secret">Sweet♡Secret</option><option value="YUMEMITYAINA">YUMEMITYAINA</option><option value="トロピカーナ">トロピカーナ</option><option value="好きMORE!甘いMORE">好きMORE!甘いMORE</option><option value="放課後シャングリラ">放課後シャングリラ</option><option value="新しい曲">新しい曲</option>
+        </select>
+      </td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-henkyoku" data-i="4"></td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-zeroprob" data-i="4"></td>
+      <td style="padding:4px 6px;text-align:center;"><button class="db-del" data-i="4">✕</button></td>
+    </tr><tr style="border-bottom: 1px solid var(--line);">
+      <td style="padding:4px 6px;"><input class="db-input" data-i="5" data-f="t" value="PaPiPuPePONG"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-time" type="text" data-i="5" data-f="time" value="3:28"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-freq" type="number" min="1" max="5" data-i="5" data-f="freq" value="5"></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="5" data-f="lightReq" value=""></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="5" data-f="soundReq" value=""></td>
+      <td style="padding:4px 6px;">
+        <select class="db-input db-base-sel" data-i="5" style="min-width:130px;">
+          <option value="">（自動判定）</option>
+          <option value="Habitable Zone">Habitable Zone</option><option value="PaPiPuPePONG">PaPiPuPePONG</option><option value="Question♡ワタシ検定">Question♡ワタシ検定</option><option value="START">START</option><option value="Sister">Sister</option><option value="Sweet♡Secret">Sweet♡Secret</option><option value="YUMEMITYAINA">YUMEMITYAINA</option><option value="トロピカーナ">トロピカーナ</option><option value="好きMORE!甘いMORE">好きMORE!甘いMORE</option><option value="放課後シャングリラ">放課後シャングリラ</option><option value="新しい曲">新しい曲</option>
+        </select>
+      </td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-henkyoku" data-i="5"></td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-zeroprob" data-i="5"></td>
+      <td style="padding:4px 6px;text-align:center;"><button class="db-del" data-i="5">✕</button></td>
+    </tr><tr style="border-bottom: 1px solid var(--line);">
+      <td style="padding:4px 6px;"><input class="db-input" data-i="6" data-f="t" value="Habitable Zone"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-time" type="text" data-i="6" data-f="time" value="4:02"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-freq" type="number" min="1" max="5" data-i="6" data-f="freq" value="5"></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="6" data-f="lightReq" value=""></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="6" data-f="soundReq" value=""></td>
+      <td style="padding:4px 6px;">
+        <select class="db-input db-base-sel" data-i="6" style="min-width:130px;">
+          <option value="">（自動判定）</option>
+          <option value="Habitable Zone">Habitable Zone</option><option value="PaPiPuPePONG">PaPiPuPePONG</option><option value="Question♡ワタシ検定">Question♡ワタシ検定</option><option value="START">START</option><option value="Sister">Sister</option><option value="Sweet♡Secret">Sweet♡Secret</option><option value="YUMEMITYAINA">YUMEMITYAINA</option><option value="トロピカーナ">トロピカーナ</option><option value="好きMORE!甘いMORE">好きMORE!甘いMORE</option><option value="放課後シャングリラ">放課後シャングリラ</option><option value="新しい曲">新しい曲</option>
+        </select>
+      </td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-henkyoku" data-i="6"></td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-zeroprob" data-i="6"></td>
+      <td style="padding:4px 6px;text-align:center;"><button class="db-del" data-i="6">✕</button></td>
+    </tr><tr style="border-bottom: 1px solid var(--line);">
+      <td style="padding:4px 6px;"><input class="db-input" data-i="7" data-f="t" value="Question♡ワタシ検定!"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-time" type="text" data-i="7" data-f="time" value="3:47"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-freq" type="number" min="1" max="5" data-i="7" data-f="freq" value="5"></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="7" data-f="lightReq" value=""></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="7" data-f="soundReq" value=""></td>
+      <td style="padding:4px 6px;">
+        <select class="db-input db-base-sel" data-i="7" style="min-width:130px;">
+          <option value="">（自動判定）</option>
+          <option value="Habitable Zone">Habitable Zone</option><option value="PaPiPuPePONG">PaPiPuPePONG</option><option value="Question♡ワタシ検定">Question♡ワタシ検定</option><option value="START">START</option><option value="Sister">Sister</option><option value="Sweet♡Secret">Sweet♡Secret</option><option value="YUMEMITYAINA">YUMEMITYAINA</option><option value="トロピカーナ">トロピカーナ</option><option value="好きMORE!甘いMORE">好きMORE!甘いMORE</option><option value="放課後シャングリラ">放課後シャングリラ</option><option value="新しい曲">新しい曲</option>
+        </select>
+      </td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-henkyoku" data-i="7"></td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-zeroprob" data-i="7"></td>
+      <td style="padding:4px 6px;text-align:center;"><button class="db-del" data-i="7">✕</button></td>
+    </tr><tr style="border-bottom: 1px solid var(--line);">
+      <td style="padding:4px 6px;"><input class="db-input" data-i="8" data-f="t" value="Sister"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-time" type="text" data-i="8" data-f="time" value="3:42"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-freq" type="number" min="1" max="5" data-i="8" data-f="freq" value="5"></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="8" data-f="lightReq" value=""></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="8" data-f="soundReq" value=""></td>
+      <td style="padding:4px 6px;">
+        <select class="db-input db-base-sel" data-i="8" style="min-width:130px;">
+          <option value="">（自動判定）</option>
+          <option value="Habitable Zone">Habitable Zone</option><option value="PaPiPuPePONG">PaPiPuPePONG</option><option value="Question♡ワタシ検定">Question♡ワタシ検定</option><option value="START">START</option><option value="Sister">Sister</option><option value="Sweet♡Secret">Sweet♡Secret</option><option value="YUMEMITYAINA">YUMEMITYAINA</option><option value="トロピカーナ">トロピカーナ</option><option value="好きMORE!甘いMORE">好きMORE!甘いMORE</option><option value="放課後シャングリラ">放課後シャングリラ</option><option value="新しい曲">新しい曲</option>
+        </select>
+      </td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-henkyoku" data-i="8"></td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-zeroprob" data-i="8"></td>
+      <td style="padding:4px 6px;text-align:center;"><button class="db-del" data-i="8">✕</button></td>
+    </tr><tr style="border-bottom: 1px solid var(--line);">
+      <td style="padding:4px 6px;"><input class="db-input" data-i="9" data-f="t" value="トロピカーナ"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-time" type="text" data-i="9" data-f="time" value="4:18"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-freq" type="number" min="1" max="5" data-i="9" data-f="freq" value="5"></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="9" data-f="lightReq" value=""></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="9" data-f="soundReq" value=""></td>
+      <td style="padding:4px 6px;">
+        <select class="db-input db-base-sel" data-i="9" style="min-width:130px;">
+          <option value="">（自動判定）</option>
+          <option value="Habitable Zone">Habitable Zone</option><option value="PaPiPuPePONG">PaPiPuPePONG</option><option value="Question♡ワタシ検定">Question♡ワタシ検定</option><option value="START">START</option><option value="Sister">Sister</option><option value="Sweet♡Secret">Sweet♡Secret</option><option value="YUMEMITYAINA">YUMEMITYAINA</option><option value="トロピカーナ">トロピカーナ</option><option value="好きMORE!甘いMORE">好きMORE!甘いMORE</option><option value="放課後シャングリラ">放課後シャングリラ</option><option value="新しい曲">新しい曲</option>
+        </select>
+      </td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-henkyoku" data-i="9"></td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-zeroprob" data-i="9"></td>
+      <td style="padding:4px 6px;text-align:center;"><button class="db-del" data-i="9">✕</button></td>
+    </tr><tr style="border-bottom: 1px solid var(--line);">
+      <td style="padding:4px 6px;"><input class="db-input" data-i="10" data-f="t" value="新しい曲"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-time" type="text" data-i="10" data-f="time" value="3:30"></td>
+      <td style="padding:4px 6px;"><input class="db-input db-freq" type="number" min="1" max="5" data-i="10" data-f="freq" value="3"></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="10" data-f="lightReq" value=""></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="10" data-f="soundReq" value=""></td>
+      <td style="padding:4px 6px;">
+        <select class="db-input db-base-sel" data-i="10" style="min-width:130px;">
+          <option value="">（自動判定）</option>
+          <option value="Habitable Zone">Habitable Zone</option><option value="PaPiPuPePONG">PaPiPuPePONG</option><option value="Question♡ワタシ検定">Question♡ワタシ検定</option><option value="START">START</option><option value="Sister">Sister</option><option value="Sweet♡Secret">Sweet♡Secret</option><option value="YUMEMITYAINA">YUMEMITYAINA</option><option value="トロピカーナ">トロピカーナ</option><option value="好きMORE!甘いMORE">好きMORE!甘いMORE</option><option value="放課後シャングリラ">放課後シャングリラ</option><option value="新しい曲">新しい曲</option>
+        </select>
+      </td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-henkyoku" data-i="10"></td>
+      <td style="padding:4px 6px;text-align:center;"><input type="checkbox" class="db-check db-zeroprob" data-i="10"></td>
+      <td style="padding:4px 6px;text-align:center;"><button class="db-del" data-i="10">✕</button></td>
+    </tr></tbody>
       </table>
     </div>
   </div>
 
   <!-- 下：楽曲一覧 -->
   <div class="panel panel-songlist">
-    <h2>楽曲一覧<span id="songCount" style="color:var(--text-dim);font-weight:400;"></span></h2>
+    <h2>楽曲一覧<span id="songCount" style="color:var(--text-dim);font-weight:400;"> (11曲)</span></h2>
     <div class="legend">
       <span><span class="dot" style="background:#e2004f"></span>メイン曲</span>
       <span><span class="dot" style="background:#a8650a"></span>変化球曲</span>
     </div>
-    <div class="song-list" id="songList"></div>
+    <div class="song-list" id="songList"><div style="margin-bottom: 14px;"><div style="font-size:11px;font-weight:700;color:#e2004f;letter-spacing:.05em;padding:4px 0 6px;display:flex;align-items:center;gap:6px;">
+      <span style="width:8px;height:8px;border-radius:50%;background:#e2004f;display:inline-block;"></span>メイン曲
+    </div><div class="song-group"><div class="group-header">START<span class="gline"></span></div><div class="group-rows"><div class="song-row">
+          <span class="freq-dot" style="background:#e2004f"></span>
+          <span class="song-main">
+            <div class="song-title">START!</div>
+            <div class="song-meta">3:49</div>
+          </span>
+          
+        </div></div></div><div class="song-group"><div class="group-header">好きMORE!甘いMORE<span class="gline"></span></div><div class="group-rows"><div class="song-row">
+          <span class="freq-dot" style="background:#e2004f"></span>
+          <span class="song-main">
+            <div class="song-title">好きMORE!甘いMORE!</div>
+            <div class="song-meta">3:05</div>
+          </span>
+          
+        </div></div></div><div class="song-group"><div class="group-header">Sweet♡Secret<span class="gline"></span></div><div class="group-rows"><div class="song-row used">
+          <span class="freq-dot" style="background:#e2004f"></span>
+          <span class="song-main">
+            <div class="song-title">Sweet♡Secret</div>
+            <div class="song-meta">3:27</div>
+          </span>
+          <span class="badge-used">採用済</span>
+        </div></div></div><div class="song-group"><div class="group-header">放課後シャングリラ<span class="gline"></span></div><div class="group-rows"><div class="song-row used">
+          <span class="freq-dot" style="background:#e2004f"></span>
+          <span class="song-main">
+            <div class="song-title">放課後シャングリラ</div>
+            <div class="song-meta">3:23</div>
+          </span>
+          <span class="badge-used">採用済</span>
+        </div></div></div><div class="song-group"><div class="group-header">YUMEMITYAINA<span class="gline"></span></div><div class="group-rows"><div class="song-row used">
+          <span class="freq-dot" style="background:#e2004f"></span>
+          <span class="song-main">
+            <div class="song-title">YUMEMITYAINA</div>
+            <div class="song-meta">3:32</div>
+          </span>
+          <span class="badge-used">採用済</span>
+        </div></div></div><div class="song-group"><div class="group-header">PaPiPuPePONG<span class="gline"></span></div><div class="group-rows"><div class="song-row">
+          <span class="freq-dot" style="background:#e2004f"></span>
+          <span class="song-main">
+            <div class="song-title">PaPiPuPePONG</div>
+            <div class="song-meta">3:28</div>
+          </span>
+          
+        </div></div></div><div class="song-group"><div class="group-header">Habitable Zone<span class="gline"></span></div><div class="group-rows"><div class="song-row">
+          <span class="freq-dot" style="background:#e2004f"></span>
+          <span class="song-main">
+            <div class="song-title">Habitable Zone</div>
+            <div class="song-meta">4:02</div>
+          </span>
+          
+        </div></div></div><div class="song-group"><div class="group-header">Question♡ワタシ検定<span class="gline"></span></div><div class="group-rows"><div class="song-row">
+          <span class="freq-dot" style="background:#e2004f"></span>
+          <span class="song-main">
+            <div class="song-title">Question♡ワタシ検定!</div>
+            <div class="song-meta">3:47</div>
+          </span>
+          
+        </div></div></div><div class="song-group"><div class="group-header">Sister<span class="gline"></span></div><div class="group-rows"><div class="song-row used">
+          <span class="freq-dot" style="background:#e2004f"></span>
+          <span class="song-main">
+            <div class="song-title">Sister</div>
+            <div class="song-meta">3:42</div>
+          </span>
+          <span class="badge-used">採用済</span>
+        </div></div></div><div class="song-group"><div class="group-header">トロピカーナ<span class="gline"></span></div><div class="group-rows"><div class="song-row">
+          <span class="freq-dot" style="background:#e2004f"></span>
+          <span class="song-main">
+            <div class="song-title">トロピカーナ</div>
+            <div class="song-meta">4:18</div>
+          </span>
+          
+        </div></div></div><div class="song-group"><div class="group-header">新しい曲<span class="gline"></span></div><div class="group-rows"><div class="song-row">
+          <span class="freq-dot" style="background:#e2004f"></span>
+          <span class="song-main">
+            <div class="song-title">新しい曲</div>
+            <div class="song-meta">3:30</div>
+          </span>
+          
+        </div></div></div></div><div style="margin-bottom: 14px;"><div style="font-size:11px;font-weight:700;color:#a8650a;letter-spacing:.05em;padding:4px 0 6px;display:flex;align-items:center;gap:6px;">
+      <span style="width:8px;height:8px;border-radius:50%;background:#a8650a;display:inline-block;"></span>変化球曲
+    </div></div></div>
   </div>
 
 </div>
@@ -534,12 +890,12 @@ const DB = [
 {t:"START!", time:"3:49", freq:5, light:"ポップ/元気に", onkyo:""},
 {t:"好きMORE!甘いMORE!", time:"3:05", freq:5, light:"ポップ/かわいく", onkyo:""},
 {t:"Sweet♡Secret", time:"3:27", freq:5, light:"ポップ/かわいく", onkyo:""},
-{t:"放課後シャングリラ", time:"3:23", freq:5, light:"ポップ", onkyo:""},
-{t:"YUMEMITYAINA", time:"3:32", freq:5, light:"ポップ/元気に", onkyo:""},
-{t:"PaPePiPuPePONG", time:"3:28", freq:5, light:"ポップ", onkyo:""},
-{t:"Habitable Zone", time:"4:02", freq:5, light:"エモロック/かっこよく", onkyo:""},
-{t:"Question♡ワタシ検定!", time:"3:47", freq:5, light:"ポップ", onkyo:""},
-{t:"Sister", time:"3:42", freq:5, light:"赤/青系", onkyo:""},
+{t:"放課後シャングリラ", time:"3:23", freq:5, light:"ポップ/元気（落ちサビ赤色希望）", onkyo:""},
+{t:"YUMEMITYAINA", time:"3:32", freq:5, light:"ポップ/元気/カラフル", onkyo:""},
+{t:"PaPiPuPePONG", time:"3:28", freq:5, light:"ポップ/カラフル", onkyo:""},
+{t:"Habitable Zone", time:"4:02", freq:5, light:"エモロック/明るめ（落ちサビ白色希望）", onkyo:""},
+{t:"Question♡ワタシ検定!", time:"3:47", freq:5, light:"ポップ/かわいく", onkyo:""},
+{t:"Sister", time:"3:42", freq:5, light:"かわいく/ピンク色多め", onkyo:""},
 {t:"トロピカーナ", time:"4:18", freq:5, light:"POP/夏曲/明るめ", onkyo:""},
 ];
 
@@ -1707,6 +2063,9 @@ const DB_INITIAL = DB.map(s=>({...s}));
   }catch(e){}
 })();
 
+// DBエディター内のテーブルは常に最新のDB配列と同期させる（ページ読み込み時点の古い表示を防ぐ）
+if(document.getElementById('dbTableBody')) renderDbEditor();
+
 function renderDbEditor(){
   const reqEl = document.getElementById('dbDefaultRequest');
   if(reqEl) reqEl.value = document.getElementById('generalRequest').value;
@@ -1727,8 +2086,8 @@ function renderDbEditor(){
       <td style="padding:4px 6px;"><input class="db-input" data-i="${i}" data-f="t" value="${(song.t||'').replace(/"/g,'&quot;')}"></td>
       <td style="padding:4px 6px;"><input class="db-input db-time" type="text" data-i="${i}" data-f="time" value="${song.time||''}"></td>
       <td style="padding:4px 6px;"><input class="db-input db-freq" type="number" min="1" max="5" data-i="${i}" data-f="freq" value="${song.freq||3}"></td>
-      <td style="padding:4px 6px;"><input class="db-input" data-i="${i}" data-f="lightReq" value="${(song.lightReq||'').replace(/"/g,'&quot;')}"></td>
-      <td style="padding:4px 6px;"><input class="db-input" data-i="${i}" data-f="soundReq" value="${(song.soundReq||'').replace(/"/g,'&quot;')}"></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="${i}" data-f="light" value="${(song.light||'').replace(/"/g,'&quot;')}"></td>
+      <td style="padding:4px 6px;"><input class="db-input" data-i="${i}" data-f="onkyo" value="${(song.onkyo||'').replace(/"/g,'&quot;')}"></td>
       <td style="padding:4px 6px;">
         <select class="db-input db-base-sel" data-i="${i}" style="min-width:130px;">
           <option value="">（自動判定）</option>
@@ -1789,7 +2148,7 @@ document.getElementById('dbEditorBtn').addEventListener('click', ()=>{
 });
 
 document.getElementById('dbAddSongBtn').addEventListener('click', ()=>{
-  DB.push({t:'新しい曲', time:'3:30', freq:3, lightReq:'', soundReq:''});
+  DB.push({t:'新しい曲', time:'3:30', freq:3, light:'', onkyo:''});
   renderDbEditor();
   renderAll();
 });
@@ -1958,5 +2317,6 @@ body{ padding:10mm; background:#000; }
 });
 </script>
 
-</body>
-</html>
+
+
+</body></html>
