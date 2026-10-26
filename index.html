@@ -2212,6 +2212,23 @@ document.getElementById('dbExportBtn').addEventListener('click', ()=>{
 });
 
 // 画像アップロード
+function resizeImageToDataUrl(file, maxW, maxH, quality, cb){
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    const img = new Image();
+    img.onload = ()=>{
+      let w = img.width, h = img.height;
+      if(w > maxW){ h = Math.round(h * maxW / w); w = maxW; }
+      if(h > maxH){ w = Math.round(w * maxH / h); h = maxH; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      cb(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
 function setupImageUpload(inputId, previewId, globalKey, imgVarName){
   const input = document.getElementById(inputId);
   const preview = document.getElementById(previewId);
@@ -2221,14 +2238,11 @@ function setupImageUpload(inputId, previewId, globalKey, imgVarName){
   input.addEventListener('change', e=>{
     const file = e.target.files[0];
     if(!file) return;
-    const reader = new FileReader();
-    reader.onload = ev=>{
-      const dataUrl = ev.target.result;
+    resizeImageToDataUrl(file, 1200, 800, 0.82, dataUrl=>{
       window[globalKey] = dataUrl;
       window[imgVarName] = dataUrl;
-      preview.innerHTML = `<img src="${dataUrl}" style="max-height:48px;border-radius:4px;border:1px solid var(--line);">`;
-    };
-    reader.readAsDataURL(file);
+      preview.innerHTML = `<img src="${dataUrl}" style="max-height:48px;border-radius:4px;border:1px solid var(--line);"><span style="font-size:11px;color:var(--text-dim);margin-left:6px;">約${Math.round(dataUrl.length/1024)}KB</span>`;
+    });
   });
 }
 setupImageUpload('dbLogoFile','dbLogoPreview','_DB_LOGO_IMG','LOGO_IMG');
